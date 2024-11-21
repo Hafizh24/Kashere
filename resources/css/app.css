@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .page-wrapper {
+        @apply container w-full max-w-6xl p-6 mx-auto space-y-6;
+    }
+}
