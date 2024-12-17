@@ -21,12 +21,15 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    // protected static ?int $navigationSort = 1;
+    protected static ?string $navigationGroup = 'Product Management';
 
     public static function form(Form $form): Form
     {
@@ -51,7 +54,6 @@ class ProductResource extends Resource
                     ->numeric(),
 
                 Textarea::make('description')
-                    ->required()
                     ->rows(3)
                     ->columnSpanFull(),
 
@@ -77,10 +79,12 @@ class ProductResource extends Resource
             ->columns([
                 TextColumn::make('category.name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn($state) => Str::headline($state)),
 
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn($state) => Str::headline($state)),
 
                 ImageColumn::make('image'),
 
@@ -136,4 +140,11 @@ class ProductResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    protected static ?string $navigationBadgeTooltip = 'The number of products';
 }

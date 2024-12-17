@@ -17,7 +17,7 @@ return new class extends Migration
             $table->float('price');
             $table->unsignedBigInteger('total_stock');
             $table->string('image')->nullable();
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->boolean('is_active')->default(1);
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->softDeletes();
