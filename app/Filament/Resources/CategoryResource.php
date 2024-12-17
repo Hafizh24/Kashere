@@ -16,12 +16,15 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
+    // protected static ?int $navigationSort = 1;
+    protected static ?string $navigationGroup = 'Product Management';
 
     public static function form(Form $form): Form
     {
@@ -42,7 +45,8 @@ class CategoryResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn($state) => Str::headline($state)),
 
                 ImageColumn::make('image'),
             ])

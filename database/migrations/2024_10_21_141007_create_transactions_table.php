@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->float('grand_total');
+            $table->text('notes')->nullable();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();

@@ -13,6 +13,7 @@ class Transaction extends Model
 
     protected $fillable = [
         'grand_total',
+        'notes',
         'customer_id',
     ];
 
