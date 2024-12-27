@@ -36,8 +36,9 @@ class ProductResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255)
+                    ->required(),
 
                 TextInput::make('price')
                     ->required()
