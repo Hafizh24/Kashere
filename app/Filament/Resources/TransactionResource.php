@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Exports\TransactionExporter;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Filament\Resources\TransactionResource\RelationManagers;
+use App\Models\Category;
+use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Transaction;
 use Filament\Forms;
@@ -48,6 +50,11 @@ class TransactionResource extends Resource
                     Section::make('Customer Information')->schema([
                         Select::make('customer_id')
                             ->relationship('customer', 'name')
+                            ->options(
+                                Customer::all()
+                                    ->pluck('name', 'id')
+                                    ->map(fn($name) => Str::headline($name))
+                            )
                             ->createOptionForm([
                                 TextInput::make('name')
                                     ->required()
@@ -75,6 +82,10 @@ class TransactionResource extends Resource
                             ->schema([
                                 Select::make('product_id')
                                     ->relationship('product', 'name')
+                                    ->options(fn() => Product::where('is_active', true)
+                                        ->where('total_stock', '>', 0)
+                                        ->get()->pluck('name', 'id')
+                                        ->map(fn($name) => Str::headline($name)))
                                     ->required()
                                     ->searchable()
                                     ->preload()
@@ -95,6 +106,7 @@ class TransactionResource extends Resource
                                     ->live()
                                     ->columnSpan(2)
                                     ->required()
+                                    ->maxValue(fn(Get $get) => Product::find($get('product_id'))?->total_stock ?? 0)
                                     ->afterStateUpdated(function (Set $set, Get $get, $state) {
                                         $set('total_amount', $state * $get('unit_amount'));
                                     }),
@@ -142,6 +154,7 @@ class TransactionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('customer.name')
                     ->sortable()
@@ -189,6 +202,7 @@ class TransactionResource extends Resource
         return [
             'index' => Pages\ListTransactions::route('/'),
             'create' => Pages\CreateTransaction::route('/create'),
+            'view' => Pages\ViewTransaction::route('/{record}'),
             'edit' => Pages\EditTransaction::route('/{record}/edit'),
         ];
     }

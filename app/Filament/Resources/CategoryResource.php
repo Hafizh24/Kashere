@@ -32,6 +32,7 @@ class CategoryResource extends Resource
             ->schema([
                 TextInput::make('name')
                     ->required()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255),
 
                 FileUpload::make('image')
