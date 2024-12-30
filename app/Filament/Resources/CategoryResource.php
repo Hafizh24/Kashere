@@ -37,7 +37,8 @@ class CategoryResource extends Resource
 
                 FileUpload::make('image')
                     ->directory('categories')
-                    ->image(),
+                    ->image()
+                    ->imageEditor(),
             ]);
     }
 
@@ -47,6 +48,7 @@ class CategoryResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
+                    ->sortable()
                     ->formatStateUsing(fn($state) => Str::headline($state)),
 
                 ImageColumn::make('image'),

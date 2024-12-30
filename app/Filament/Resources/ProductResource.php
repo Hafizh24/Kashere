@@ -7,17 +7,21 @@ use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -27,7 +31,7 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-bolt';
     // protected static ?int $navigationSort = 1;
     protected static ?string $navigationGroup = 'Product Management';
 
@@ -35,42 +39,58 @@ class ProductResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255)
-                    ->required(),
+                Group::make()->schema([
+                    Section::make('Product Information')
+                        ->schema([
+                            TextInput::make('name')
+                                ->unique(ignoreRecord: true)
+                                ->live(onBlur: true)
+                                ->maxLength(255)
+                                ->required()
+                                ->afterStateUpdated(fn($state, Set $set) =>  $set('slug', Str::slug($state))),
 
-                TextInput::make('price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('Rp. '),
+                            TextInput::make('slug')
+                                ->disabled(),
 
-                FileUpload::make('image')
-                    ->directory('products')
-                    ->image(),
+                            Textarea::make('description')
+                                ->rows(3)
+                                ->columnSpanFull(),
+                        ])->columns(2),
 
-                TextInput::make('total_stock')
-                    ->required()
-                    ->label('Stock')
-                    ->numeric(),
+                    Section::make("Image")->schema([
+                        FileUpload::make('image')
+                            ->directory('products')
+                            ->image()
+                            ->imageEditor(),
+                    ])->collapsible(),
+                ]),
 
-                Textarea::make('description')
-                    ->rows(3)
-                    ->columnSpanFull(),
+                Group::make()->schema([
+                    Section::make('Pricing & Inventory')->schema([
+                        TextInput::make('price')
+                            ->required()
+                            ->numeric()
+                            ->prefix('Rp. '),
 
-                Select::make('category_id')
-                    ->relationship('category', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->required(),
+                        TextInput::make('total_stock')
+                            ->required()
+                            ->label('Stock')
+                            ->numeric(),
+                    ]),
 
-                Select::make('is_active')
-                    ->options([
-                        1 => 'Active',
-                        0 => 'Inactive',
-                    ])
-                    ->default(1),
+                    Section::make('Status & Associations')->schema([
+                        Select::make('category_id')
+                            ->relationship('category', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
 
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->helperText('Toggle to make the product active or inactive.')
+                            ->default(true),
+                    ]),
+                ]),
             ]);
     }
 
@@ -102,6 +122,8 @@ class ProductResource extends Resource
 
             ])
             ->filters([
+                SelectFilter::make('category')
+                    ->relationship('category', 'name'),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([

@@ -23,9 +23,11 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $navigationGroup = 'User Management';
+    protected static ?string $navigationGroup = 'Settings';
+
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -48,7 +50,6 @@ class UserResource extends Resource
 
                 Select::make('roles')
                     ->relationship('roles', 'name')
-                    ->multiple()
                     ->preload()
                     ->searchable(),
 
@@ -108,12 +109,12 @@ class UserResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        $admins = User::whereHas('roles', function ($query) {
-            $query->where('name', 'super_admin');
-        })->get()->pluck('id');
+    // public static function getEloquentQuery(): Builder
+    // {
+    //     $admins = User::whereHas('roles', function ($query) {
+    //         $query->where('name', 'super_admin');
+    //     })->get()->pluck('id');
 
-        return parent::getEloquentQuery()->whereNotIn('id', $admins);
-    }
+    //     return parent::getEloquentQuery()->whereNotIn('id', $admins);
+    // }
 }

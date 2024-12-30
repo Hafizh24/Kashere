@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\Variable;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Group;
@@ -42,6 +43,8 @@ class TransactionResource extends Resource
 
     // protected static ?int $navigationSort = 4;
 
+
+
     public static function form(Form $form): Form
     {
         return $form
@@ -69,7 +72,6 @@ class TransactionResource extends Resource
                                     ->modalButton('Add Customer');
                             })
                             ->searchable()
-                            ->preload()
                             ->required(),
 
                         TextInput::make('notes')
@@ -127,15 +129,17 @@ class TransactionResource extends Resource
                             ])->columns(12),
 
                         Placeholder::make('grand_total_placeholder')
-                            ->label('Grand Total')
+                            ->label('Grand Total (include tax)')
                             ->content(function (Get $get, Set $set) {
                                 $total = 0;
                                 if (!$repeaters = $get('transactionProducts')) {
                                     return $total;
                                 }
 
+                                $tax = 1 + intval(Variable::where('name', 'tax rate')->first()->value) / 100;
+
                                 foreach ($repeaters as $item => $value) {
-                                    $total += $get('transactionProducts.' . $item . '.total_amount');
+                                    $total = $get('transactionProducts.' . $item . '.total_amount') * $tax;
                                 }
 
                                 $set('grand_total', $total);
@@ -145,9 +149,9 @@ class TransactionResource extends Resource
 
                         Hidden::make('grand_total')
                             ->default(0),
+
                     ])
                 ])->columnSpanFull()
-
             ]);
     }
 
@@ -206,4 +210,4 @@ class TransactionResource extends Resource
             'edit' => Pages\EditTransaction::route('/{record}/edit'),
         ];
     }
-}
+};
