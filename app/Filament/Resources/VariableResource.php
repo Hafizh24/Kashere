@@ -2,29 +2,28 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CustomerResource\Pages;
-use App\Filament\Resources\CustomerResource\RelationManagers;
-use App\Models\Customer;
+use App\Filament\Resources\VariableResource\Pages;
+use App\Filament\Resources\VariableResource\RelationManagers;
+use App\Models\Variable;
 use Filament\Forms;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Support\Str;
 
-class CustomerResource extends Resource
+class VariableResource extends Resource
 {
-    protected static ?string $model = Customer::class;
+    protected static ?string $model = Variable::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationIcon = 'heroicon-o-wrench';
 
+    protected static ?string $navigationGroup = 'Settings';
+
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
@@ -32,29 +31,23 @@ class CustomerResource extends Resource
             ->schema([
                 Section::make()->schema([
                     TextInput::make('name')
-                        ->required()
-                        ->maxLength(255),
+                        ->required(),
 
-                    TextInput::make('email')
-                        ->email()
-                        ->required()
-                        ->unique(ignoreRecord: true)
-                        ->maxLength(255),
-                ])->columns(2)
+                    TextInput::make('value')
+                        ->required(),
+                ])->columns(2),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-            ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('name')
-                    ->sortable()
+                Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->formatStateUsing(fn($state) => Str::headline($state)),
+                    ->sortable(),
 
-                TextColumn::make('email')
+                Tables\Columns\TextColumn::make('value')
                     ->searchable(),
             ])
             ->filters([
@@ -62,7 +55,6 @@ class CustomerResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -81,9 +73,9 @@ class CustomerResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCustomers::route('/'),
-            'create' => Pages\CreateCustomer::route('/create'),
-            'edit' => Pages\EditCustomer::route('/{record}/edit'),
+            'index' => Pages\ListVariables::route('/'),
+            'create' => Pages\CreateVariable::route('/create'),
+            'edit' => Pages\EditVariable::route('/{record}/edit'),
         ];
     }
 }
