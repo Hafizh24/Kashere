@@ -6,6 +6,7 @@ use App\Filament\Resources\VariableResource\Pages;
 use App\Filament\Resources\VariableResource\RelationManagers;
 use App\Models\Variable;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -28,11 +29,13 @@ class VariableResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->required(),
+                Section::make()->schema([
+                    TextInput::make('name')
+                        ->required(),
 
-                TextInput::make('value')
-                    ->required(),
+                    TextInput::make('value')
+                        ->required(),
+                ])->columns(2),
             ]);
     }
 

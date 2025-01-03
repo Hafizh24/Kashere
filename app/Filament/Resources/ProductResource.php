@@ -79,17 +79,20 @@ class ProductResource extends Resource
                     ]),
 
                     Section::make('Status & Associations')->schema([
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->helperText('Toggle to make the product active or inactive.')
+                            ->default(true),
+
                         Select::make('category_id')
                             ->relationship('category', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
 
-                        Toggle::make('is_active')
-                            ->label('Active')
-                            ->helperText('Toggle to make the product active or inactive.')
-                            ->default(true),
                     ]),
+
+
                 ]),
             ]);
     }
@@ -105,6 +108,7 @@ class ProductResource extends Resource
 
                 TextColumn::make('name')
                     ->searchable()
+                    ->sortable()
                     ->formatStateUsing(fn($state) => Str::headline($state)),
 
                 ImageColumn::make('image'),

@@ -41,8 +41,6 @@ class TransactionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
-    // protected static ?int $navigationSort = 4;
-
 
 
     public static function form(Form $form): Form
@@ -55,7 +53,7 @@ class TransactionResource extends Resource
                             ->placeholder('Select Customer')
                             ->relationship('customer', 'name')
                             ->options(
-                                Customer::all()
+                                Customer::query()
                                     ->pluck('name', 'id')
                                     ->map(fn($name) => Str::headline($name))
                             )
@@ -63,7 +61,8 @@ class TransactionResource extends Resource
                                 TextInput::make('name')
                                     ->required()
                                     ->maxLength(255),
-                                TextInput::make('contact')
+                                TextInput::make('email')
+                                    ->email()
                                     ->maxLength(255)
                                     ->required()
                             ])
@@ -124,6 +123,7 @@ class TransactionResource extends Resource
                                 TextInput::make('quantity')
                                     ->numeric()
                                     ->minValue(1)
+                                    ->default(1)
                                     ->live()
                                     ->columnSpan(2)
                                     ->required()
@@ -158,7 +158,7 @@ class TransactionResource extends Resource
                                 $tax = 1 + intval(Variable::where('name', 'tax rate')->first()->value) / 100;
 
                                 foreach ($repeaters as $item => $value) {
-                                    $total = $get('transactionProducts.' . $item . '.total_amount') * $tax;
+                                    $total += $get('transactionProducts.' . $item . '.total_amount') * $tax;
                                 }
 
                                 $set('grand_total', $total);

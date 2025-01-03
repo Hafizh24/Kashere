@@ -6,6 +6,7 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -33,25 +34,27 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
+                Section::make()->schema([
+                    TextInput::make('name')
+                        ->required()
+                        ->maxLength(255),
 
-                TextInput::make('email')
-                    ->email()
-                    ->unique(ignoreRecord: true)
-                    ->required()
-                    ->maxLength(255),
+                    TextInput::make('email')
+                        ->email()
+                        ->unique(ignoreRecord: true)
+                        ->required()
+                        ->maxLength(255),
 
-                TextInput::make('password')
-                    ->password()
-                    ->dehydrated(fn($state) => filled($state))
-                    ->required(fn(Page $livewire): bool => $livewire instanceof CreateRecord),
+                    TextInput::make('password')
+                        ->password()
+                        ->dehydrated(fn($state) => filled($state))
+                        ->required(fn(Page $livewire): bool => $livewire instanceof CreateRecord),
 
-                Select::make('roles')
-                    ->relationship('roles', 'name')
-                    ->preload()
-                    ->searchable(),
+                    Select::make('roles')
+                        ->relationship('roles', 'name')
+                        ->preload()
+                        ->searchable(),
+                ])->columns(2),
 
 
             ]);

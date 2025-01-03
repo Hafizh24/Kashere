@@ -7,8 +7,10 @@ use App\Filament\Resources\CategoryResource\RelationManagers;
 use App\Models\Category;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
@@ -30,15 +32,22 @@ class CategoryResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255),
+                Section::make()->schema([
+                    TextInput::make('name')
+                        ->required()
+                        ->unique(ignoreRecord: true)
+                        ->maxLength(255)
+                        ->afterStateUpdated(fn($state, Set $set) =>  $set('slug', Str::slug($state))),
 
-                FileUpload::make('image')
-                    ->directory('categories')
-                    ->image()
-                    ->imageEditor(),
+                    TextInput::make('slug')
+                        ->disabled(),
+
+                    FileUpload::make('image')
+                        ->directory('categories')
+                        ->image()
+                        ->imageEditor()
+                        ->columnSpanFull(),
+                ])->columns(2),
             ]);
     }
 
