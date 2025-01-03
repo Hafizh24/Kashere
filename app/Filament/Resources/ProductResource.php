@@ -118,6 +118,7 @@ class ProductResource extends Resource
 
                 IconColumn::make('is_active')
                     ->boolean()
+                    ->sortable()
                     ->label('Active'),
 
             ])

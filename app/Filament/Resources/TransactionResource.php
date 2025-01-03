@@ -52,6 +52,7 @@ class TransactionResource extends Resource
                 Group::make()->schema([
                     Section::make('Customer Information')->schema([
                         Select::make('customer_id')
+                            ->placeholder('Select Customer')
                             ->relationship('customer', 'name')
                             ->options(
                                 Customer::all()
@@ -82,9 +83,27 @@ class TransactionResource extends Resource
                             ->label('')
                             ->relationship()
                             ->schema([
+                                Select::make('category_id')
+                                    ->label('Category')
+                                    ->placeholder('Select Category')
+                                    ->options(
+                                        Category::all()
+                                            ->pluck('name', 'id')
+                                            ->map(fn($name) => Str::headline($name))
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->live()
+                                    ->columnSpan(3)
+                                    ->afterStateUpdated(fn(Set $set) => $set('product_id', null))
+                                    ->afterStateUpdated(fn(Set $set) => $set('unit_amount', null))
+                                    ->afterStateUpdated(fn(Set $set) => $set('total_amount', null)),
+
                                 Select::make('product_id')
+                                    ->placeholder('Select Product')
                                     ->relationship('product', 'name')
-                                    ->options(fn() => Product::where('is_active', true)
+                                    ->options(fn(Get $get) => Product::where('category_id', $get('category_id'))
+                                        ->where('is_active', true)
                                         ->where('total_stock', '>', 0)
                                         ->get()->pluck('name', 'id')
                                         ->map(fn($name) => Str::headline($name)))
@@ -92,7 +111,7 @@ class TransactionResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->distinct()
-                                    ->columnSpan(4)
+                                    ->columnSpan(3)
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                                     ->live()
                                     ->afterStateUpdated(function (Set $set, $state) {
@@ -118,14 +137,14 @@ class TransactionResource extends Resource
                                     ->required()
                                     ->disabled()
                                     ->dehydrated()
-                                    ->columnSpan(3),
+                                    ->columnSpan(2),
 
                                 TextInput::make('total_amount')
                                     ->numeric()
                                     ->required()
                                     ->disabled()
                                     ->dehydrated()
-                                    ->columnSpan(3),
+                                    ->columnSpan(2),
                             ])->columns(12),
 
                         Placeholder::make('grand_total_placeholder')
