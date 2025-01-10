@@ -46,11 +46,7 @@ class ProductResource extends Resource
                                 ->unique(ignoreRecord: true)
                                 ->live(onBlur: true)
                                 ->maxLength(255)
-                                ->required()
-                                ->afterStateUpdated(fn($state, Set $set) =>  $set('slug', Str::slug($state))),
-
-                            TextInput::make('slug')
-                                ->disabled(),
+                                ->required(),
 
                             Textarea::make('description')
                                 ->rows(3)

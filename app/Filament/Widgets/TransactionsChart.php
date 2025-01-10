@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Transaction;
 use Carbon\Carbon;
+use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 use Flowframe\Trend\Trend;
 use Flowframe\Trend\TrendValue;
@@ -34,6 +35,21 @@ class TransactionsChart extends ChartWidget
             ],
             'labels' => $data->map(fn(TrendValue $value) => Carbon::parse($value->date)->format('M')),
         ];
+    }
+
+    protected function getOptions(): RawJs
+    {
+        return RawJs::make(<<<JS
+        {
+            scales: {
+                y: {
+                    ticks: {
+                        precision: 0
+                    },
+                },
+            },
+        }
+    JS);
     }
 
     protected function getType(): string

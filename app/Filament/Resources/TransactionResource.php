@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Exports\TransactionExporter;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Filament\Resources\TransactionResource\RelationManagers;
+use App\Mail\SendInvoice;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Product;
@@ -22,6 +23,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
@@ -30,7 +32,9 @@ use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 
@@ -155,14 +159,14 @@ class TransactionResource extends Resource
                                     return $total;
                                 }
 
-                                $tax = 1 + intval(Variable::where('name', 'tax rate')->first()->value) / 100;
+                                $tax = 1 + intval(Variable::where('name', 'tax_rate')->first()->value ?? 10) / 100;
 
                                 foreach ($repeaters as $item => $value) {
                                     $total += $get('transactionProducts.' . $item . '.total_amount') * $tax;
                                 }
 
                                 $set('grand_total', $total);
-
+                                number_format($total, 0, ',', '.');
                                 return Number::currency($total, 'Rp.');
                             }),
 
@@ -198,9 +202,31 @@ class TransactionResource extends Resource
                 //
             ])
             ->actions([
+                ActionGroup::make([
 
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                    // Tables\Actions\Action::make('view_invoice')
+                    //     ->label('View Invoice')
+                    //     ->icon('heroicon-o-document-text')
+                    //     ->url(fn($record) => route('filament.admin.resources.transactions.invoice', $record)),
+
+                    Tables\Actions\EditAction::make(),
+
+                    Tables\Actions\Action::make('send invoice')
+                        ->icon('heroicon-o-envelope')
+                        ->visible(fn($record) => $record->invoice_sent == false)
+                        ->action(function (Model $record) {
+                            Mail::to($record->customer->email)->send(new SendInvoice($record));
+
+                            $record->update(['invoice_sent' => 1]);
+
+
+                            Notification::make()
+                                ->success()
+                                ->title('Invoice Sent')
+                                ->body('The invoice has been sent to ' . $record->customer->email)
+                                ->send();
+                        }),
+                ])
 
             ])
             ->bulkActions([
@@ -227,6 +253,7 @@ class TransactionResource extends Resource
             'create' => Pages\CreateTransaction::route('/create'),
             'view' => Pages\ViewTransaction::route('/{record}'),
             'edit' => Pages\EditTransaction::route('/{record}/edit'),
+            'invoice' => Pages\Invoice::route('/{record}/invoice'),
         ];
     }
 };

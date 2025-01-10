@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->float('grand_total');
             $table->text('notes')->nullable();
+            $table->boolean('invoice_sent')->default(0);
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
