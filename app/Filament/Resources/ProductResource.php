@@ -18,6 +18,7 @@ use Filament\Forms\Form;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -46,11 +47,7 @@ class ProductResource extends Resource
                                 ->unique(ignoreRecord: true)
                                 ->live(onBlur: true)
                                 ->maxLength(255)
-                                ->required()
-                                ->afterStateUpdated(fn($state, Set $set) =>  $set('slug', Str::slug($state))),
-
-                            TextInput::make('slug')
-                                ->disabled(),
+                                ->required(),
 
                             Textarea::make('description')
                                 ->rows(3)
@@ -132,9 +129,11 @@ class ProductResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-
-                Tables\Actions\DeleteAction::make(),
+                ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -15,6 +15,7 @@ class Transaction extends Model
         'grand_total',
         'notes',
         'customer_id',
+        'invoice_sent',
     ];
 
     public function customer(): BelongsTo
