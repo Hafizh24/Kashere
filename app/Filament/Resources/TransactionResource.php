@@ -203,11 +203,7 @@ class TransactionResource extends Resource
             ])
             ->actions([
                 ActionGroup::make([
-
-                    // Tables\Actions\Action::make('view_invoice')
-                    //     ->label('View Invoice')
-                    //     ->icon('heroicon-o-document-text')
-                    //     ->url(fn($record) => route('filament.admin.resources.transactions.invoice', $record)),
+                    Tables\Actions\ViewAction::make(),
 
                     Tables\Actions\EditAction::make(),
 
@@ -253,7 +249,6 @@ class TransactionResource extends Resource
             'create' => Pages\CreateTransaction::route('/create'),
             'view' => Pages\ViewTransaction::route('/{record}'),
             'edit' => Pages\EditTransaction::route('/{record}/edit'),
-            'invoice' => Pages\Invoice::route('/{record}/invoice'),
         ];
     }
 };
