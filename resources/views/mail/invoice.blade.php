@@ -9,6 +9,7 @@
 </head>
 
 <body>
+    <div>{{ $name }}</div>
     <div
         style="background-color: white; border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); max-width: 30rem; margin: 0 auto;">
         {{-- header --}}
@@ -33,8 +34,8 @@
             </div>
             <div style="text-align: right;">
                 <h2 style="font-weight: 700; color: #374151">Company</h2>
-                <p style="color:#4b5563">Kashere</p>
-                <p style="color:#4b5563">admin@kashere.com</p>
+                <p style="color:#4b5563">{{ $name }}</p>
+                <p style="color:#4b5563">{{ $email }}</p>
             </div>
         </div>
 

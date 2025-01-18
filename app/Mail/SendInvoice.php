@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\Transaction;
+use App\Models\Variable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -15,6 +16,9 @@ class SendInvoice extends Mailable
     use Queueable, SerializesModels;
 
     public $transaction;
+    public  $variable;
+
+
 
     /**
      * Create a new message instance.
@@ -22,6 +26,7 @@ class SendInvoice extends Mailable
     public function __construct($transaction)
     {
         $this->transaction = $transaction;
+        $this->variable = Variable::all();
     }
 
     /**
@@ -41,6 +46,10 @@ class SendInvoice extends Mailable
     {
         return new Content(
             view: 'mail.invoice',
+            with: [
+                'name' => $this->variable->where('name', 'name')->first()->value,
+                'email' => $this->variable->where('name', 'email')->first()->value,
+            ]
         );
     }
 
