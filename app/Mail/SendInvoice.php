@@ -6,6 +6,7 @@ use App\Models\Transaction;
 use App\Models\Variable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Attachment;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -26,7 +27,7 @@ class SendInvoice extends Mailable
     public function __construct($transaction)
     {
         $this->transaction = $transaction;
-        $this->variable = Variable::all();
+        // $this->variable = Variable::all();
     }
 
     /**
@@ -47,8 +48,8 @@ class SendInvoice extends Mailable
         return new Content(
             view: 'mail.invoice',
             with: [
-                'name' => $this->variable->where('name', 'name')->first()->value,
-                'email' => $this->variable->where('name', 'email')->first()->value,
+                // 'name' => $this->variable->where('name', 'name')->first()->value ?? '',
+                // 'email' => $this->variable->where('name', 'email')->first()->value ?? '',
             ]
         );
     }
@@ -60,6 +61,9 @@ class SendInvoice extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        return [
+            Attachment::fromStorageDisk('public', 'invoices/' . $this->transaction->invoice)
+                ->withMime('application/pdf')
+        ];
     }
 }

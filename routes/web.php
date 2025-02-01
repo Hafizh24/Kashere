@@ -7,7 +7,7 @@ Route::get('/', function () {
 });
 
 Route::get('/mailable', function () {
-    $transaction = App\Models\Transaction::find(1);
+    $transaction = App\Models\Transaction::first();
 
     return new App\Mail\SendInvoice($transaction);
 });

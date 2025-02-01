@@ -12,6 +12,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
@@ -36,7 +37,7 @@ class CustomerResource extends Resource
                         ->required()
                         ->maxLength(255),
 
-                    TextInput::make('email')
+                    TextInput::make('email') //TODO: masking
                         ->email()
                         ->required()
                         ->unique(ignoreRecord: true)
