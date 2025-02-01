@@ -16,6 +16,8 @@ class Transaction extends Model
         'notes',
         'customer_id',
         'invoice_sent',
+        'tax',
+        'invoice',
     ];
 
     public function customer(): BelongsTo

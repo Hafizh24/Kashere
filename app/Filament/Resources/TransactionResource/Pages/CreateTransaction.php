@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TransactionResource\Pages;
 
 use App\Filament\Resources\TransactionResource;
+use App\Jobs\GenerateInvoice;
 use App\Models\Product;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
@@ -10,6 +11,12 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateTransaction extends CreateRecord
 {
     protected static string $resource = TransactionResource::class;
+
+    // protected function beforeCreate(): void
+    // {
+    //     GenerateInvoice::dispatch($this->record);
+    // }
+
 
     protected function afterCreate(): void
     {
@@ -25,6 +32,8 @@ class CreateTransaction extends CreateRecord
                 }
             }
         }
+
+        // GenerateInvoice::dispatch($transaction);
     }
 
     protected function getRedirectUrl(): string

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Exports\TransactionExporter;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Filament\Resources\TransactionResource\RelationManagers;
+use App\Jobs\GenerateInvoice;
 use App\Mail\SendInvoice;
 use App\Models\Category;
 use App\Models\Customer;
@@ -37,7 +38,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
-
+use PhpParser\Node\Expr\Cast\Bool_;
 
 class TransactionResource extends Resource
 {
@@ -98,6 +99,7 @@ class TransactionResource extends Resource
                                     ->preload()
                                     ->live()
                                     ->columnSpan(3)
+                                    ->visible(fn(string $operation) => $operation === 'create')
                                     ->afterStateUpdated(fn(Set $set) => $set('product_id', null))
                                     ->afterStateUpdated(fn(Set $set) => $set('unit_amount', null))
                                     ->afterStateUpdated(fn(Set $set) => $set('total_amount', null)),
@@ -159,19 +161,25 @@ class TransactionResource extends Resource
                                     return $total;
                                 }
 
-                                $tax = 1 + intval(Variable::where('name', 'tax_rate')->first()->value ?? 10) / 100;
+                                $taxMultiplier = intval(Variable::where('name', 'tax_rate')->first()->value ?? 10) / 100;
 
                                 foreach ($repeaters as $item => $value) {
-                                    $total += $get('transactionProducts.' . $item . '.total_amount') * $tax;
+                                    $total += $get('transactionProducts.' . $item . '.total_amount');
                                 }
 
-                                $set('grand_total', $total);
-                                number_format($total, 0, ',', '.');
-                                return Number::currency($total, 'Rp.');
+                                $tax = $total * $taxMultiplier;
+                                $grandTotal = $total + $tax;
+
+                                $set('tax', $tax);
+                                $set('grand_total', $grandTotal);
+
+                                return Number::currency($grandTotal, 'IDR');
                             }),
 
                         Hidden::make('grand_total')
                             ->default(0),
+
+                        Hidden::make('tax'),
 
                     ])
                 ])->columnSpanFull()
@@ -205,16 +213,15 @@ class TransactionResource extends Resource
                 ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
 
-                    Tables\Actions\EditAction::make(),
-
                     Tables\Actions\Action::make('send invoice')
                         ->icon('heroicon-o-envelope')
-                        ->visible(fn($record) => $record->invoice_sent == false)
+                        ->visible(fn($record): Bool => !$record->invoice_sent)
                         ->action(function (Model $record) {
-                            Mail::to($record->customer->email)->send(new SendInvoice($record));
+                            GenerateInvoice::dispatch($record);
+
+                            Mail::to($record->customer->email)->queue(new SendInvoice($record));
 
                             $record->update(['invoice_sent' => 1]);
-
 
                             Notification::make()
                                 ->success()
