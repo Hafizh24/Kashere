@@ -18,7 +18,7 @@
             has been processed.
             Here are the
             transaction details on
-            attachment</p>
+            attachment:</p>
     </div>
 </body>
 

@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Transaction;
+use App\Models\Variable;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -14,6 +14,7 @@ class GenerateInvoice implements ShouldQueue
     use Queueable;
 
     public $transaction;
+    public $variable;
 
     /**
      * Create a new job instance.
@@ -21,6 +22,7 @@ class GenerateInvoice implements ShouldQueue
     public function __construct($transaction)
     {
         $this->transaction = $transaction;
+        $this->variable = Variable::all();
     }
 
     /**
@@ -30,7 +32,11 @@ class GenerateInvoice implements ShouldQueue
     {
         File::ensureDirectoryExists(storage_path('app/public/invoices'));
 
-        $pdf = Pdf::loadView('invoice.invoice', ['transaction' => $this->transaction]);
+        $pdf = Pdf::loadView('invoice.invoice', [
+            'transaction' => $this->transaction,
+            'name' => $this->variable->where('name', 'name')->first()->value ?? '',
+            'email' => $this->variable->where('name', 'email')->first()->value ?? '',
+        ]);
 
         $filename = Str::uuid() . '.pdf';
 

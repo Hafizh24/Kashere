@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Invoice {{ $transaction->customer->name }}</title>
+
 </head>
 
 <body>
     {{-- <div>{{ $name }}</div> --}}
-    <div
-        style="background-color: white; border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); max-width: 30rem; margin: 0 auto;">
+    <div style="background-color: white; border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); max-width: 28rem; margin: 0 auto;"
+        class="max-w">
         {{-- header --}}
         <div
             style="display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem;">
@@ -21,7 +22,7 @@
                 <p style="color: #6b7280">Date: {{ $transaction->created_at->format('d M Y') }}</p>
             </div>
             <div>
-                <img src="" alt="Logo" class="h-16">
+                <img src="{{ asset('logo/logo.png') }}" alt="Logo" style="width: 6rem">
             </div>
         </div>
 
@@ -32,10 +33,10 @@
                 <p style="color:#4b5563">{{ $transaction->customer->name }}</p>
                 <p style="color:#4b5563">{{ $transaction->customer->email }}</p>
             </div>
-            <div style="text-align: right;">
+            <div>
                 <h2 style="font-weight: 700; color: #374151">Company</h2>
-                {{-- <p style="color:#4b5563">{{ $name }}</p> --}}
-                {{-- <p style="color:#4b5563">{{ $email }}</p> --}}
+                <p style="color:#4b5563">{{ $name }}</p>
+                <p style="color:#4b5563">{{ $email }}</p>
             </div>
         </div>
 
